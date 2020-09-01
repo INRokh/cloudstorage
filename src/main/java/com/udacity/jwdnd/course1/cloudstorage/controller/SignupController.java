@@ -18,12 +18,12 @@ public class SignupController {
         this.userService = userService;
     }
 
-    @GetMapping()
+    @GetMapping
     public String signupView() {
         return "signup";
     }
 
-    @PostMapping()
+    @PostMapping
     public String signupUser(@ModelAttribute User user, Model model) {
         if (!userService.isUsernameAvailable(user.getUsername())) {
             model.addAttribute("signupError", "The username already exists.");
@@ -35,6 +35,6 @@ public class SignupController {
             return "signup";
         }
         model.addAttribute("signupSuccess", true);
-        return "login";
+        return "signup";
     }
 }
