@@ -2,6 +2,8 @@ package com.udacity.jwdnd.course1.cloudstorage.controller;
 
 import com.udacity.jwdnd.course1.cloudstorage.mapper.FileMapper;
 import com.udacity.jwdnd.course1.cloudstorage.model.File;
+import com.udacity.jwdnd.course1.cloudstorage.model.Note;
+import com.udacity.jwdnd.course1.cloudstorage.model.NoteForm;
 import com.udacity.jwdnd.course1.cloudstorage.model.User;
 import com.udacity.jwdnd.course1.cloudstorage.services.FileService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
@@ -77,5 +79,30 @@ public class FileController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + fileName)
                 .contentType(MediaType.parseMediaType(contentType))
                 .body(resource);
+    }
+
+    @GetMapping("/files/delete/{fileId}")
+    public String deleteFile(@PathVariable Integer fileId, Authentication authentication, Model model) {
+        String username = authentication.getName();
+        User user = userService.getUser(username);
+        if (user == null) {
+            model.addAttribute("isSuccess", false);
+            model.addAttribute("error", "User is not found.");
+            return "result";
+        }
+        File file = fileMapper.getFileById(fileId);
+        if (file == null) {
+            model.addAttribute("isSuccess", false);
+            model.addAttribute("error", "File is not found.");
+            return "result";
+        }
+        if (user.getUserId() != file.getUserId()) {
+            model.addAttribute("isSuccess", false);
+            model.addAttribute("error", "Error when deleting file.");
+            return "result";
+        }
+        fileService.deleteFile(fileId);
+        model.addAttribute("isSuccess", true);
+        return "result";
     }
 }

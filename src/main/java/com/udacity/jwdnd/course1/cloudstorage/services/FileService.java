@@ -30,6 +30,10 @@ public class FileService {
         fileMapper.addFile(newFile);
     }
 
+    public void deleteFile(Integer fileId) {
+        fileMapper.delete(fileId);
+    }
+
     public List<File> getFiles(Integer userId) {
         return fileMapper.getUserFiles(userId);
     }
