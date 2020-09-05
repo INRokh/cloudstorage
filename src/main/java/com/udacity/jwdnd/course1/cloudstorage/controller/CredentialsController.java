@@ -1,12 +1,9 @@
 package com.udacity.jwdnd.course1.cloudstorage.controller;
 
-import com.udacity.jwdnd.course1.cloudstorage.mapper.CredentialsMapper;
 import com.udacity.jwdnd.course1.cloudstorage.model.*;
 import com.udacity.jwdnd.course1.cloudstorage.services.CredentialsService;
-import com.udacity.jwdnd.course1.cloudstorage.services.EncryptionService;
 import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,46 +13,41 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class CredentialsController {
-    private Logger logger = LoggerFactory.getLogger(CredentialsController.class);
     private UserService userService;
-    private CredentialsMapper credentialsMapper;
     private CredentialsService credentialsService;
-    private EncryptionService encryptionService;
 
-    public CredentialsController(UserService userService, CredentialsMapper credentialsMapper, CredentialsService credentialsService, EncryptionService encryptionService) {
+    public CredentialsController(UserService userService, CredentialsService credentialsService) {
         this.userService = userService;
-        this.credentialsMapper = credentialsMapper;
         this.credentialsService = credentialsService;
-        this.encryptionService = encryptionService;
     }
 
     @PostMapping("/credentials")
-    public String addOrUpdateCredentials(Authentication authentication, CredentialsForm credentialsForm, Model model) {
+    public String addOrUpdateCredentials(Authentication authentication, CredentialsForm credentialsForm, Model model)
+            throws AccessDeniedException {
         String username = authentication.getName();
         User user = userService.getUser(username);
-
         if(user == null) {
-            logger.error("user not found");
-            model.addAttribute("isSuccess", false);
-            model.addAttribute("error", "User is not found. Try again.");
-            return "result";
+            throw new AccessDeniedException("User not found: " + username);
         }
 
-        if (credentialsForm.getCredentialId() == null) {
-            credentialsService.addCredentials(credentialsForm, user.getUserId());
-
-        } else {
-            credentialsService.updateCredentials(credentialsForm);
-        }
-        model.addAttribute("isSuccess", true);
-
+        boolean isSuccess = credentialsForm.getCredentialId() == null ?
+                credentialsService.addCredentials(credentialsForm, user.getUserId()) :
+                credentialsService.updateCredentials(credentialsForm, user.getUserId());
+        model.addAttribute("isSuccess", isSuccess);
         return "result";
     }
 
     @GetMapping("/credentials/{credentialId}")
-    public String deleteCredentials(@PathVariable Integer credentialId, CredentialsForm credentialsForm, Authentication authentication, Model model) {
-        credentialsService.deleteCredentials(credentialId);
-        model.addAttribute("isSuccess", true);
+    public String deleteCredentials(@PathVariable Integer credentialId, Authentication authentication, Model model)
+            throws AccessDeniedException {
+        String username = authentication.getName();
+        User user = userService.getUser(username);
+        if(user == null) {
+            throw new AccessDeniedException("User not found: " + username);
+        }
+
+        boolean isSuccess = credentialsService.deleteCredentials(credentialId, user.getUserId());
+        model.addAttribute("isSuccess", isSuccess);
         return "result";
     }
 }

@@ -32,6 +32,5 @@ CREATE TABLE IF NOT EXISTS CREDENTIALS (
     key VARCHAR,
     password VARCHAR,
     userid INT,
-    decryptedpassword VARCHAR,
     foreign key (userid) references USERS(userid)
 );

@@ -3,6 +3,8 @@ package com.udacity.jwdnd.course1.cloudstorage.services;
 import com.udacity.jwdnd.course1.cloudstorage.mapper.CredentialsMapper;
 import com.udacity.jwdnd.course1.cloudstorage.model.Credentials;
 import com.udacity.jwdnd.course1.cloudstorage.model.CredentialsForm;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -11,6 +13,8 @@ import java.util.List;
 
 @Service
 public class CredentialsService {
+    private Logger logger = LoggerFactory.getLogger(EncryptionService.class);
+
     private CredentialsMapper credentialsMapper;
     private EncryptionService encryptionService;
 
@@ -19,7 +23,7 @@ public class CredentialsService {
         this.encryptionService = encryptionService;
     }
 
-    public void addCredentials(CredentialsForm credentialsForm, Integer userId) {
+    public boolean addCredentials(CredentialsForm credentialsForm, Integer userId) {
         SecureRandom random = new SecureRandom();
         byte[] key = new byte[16];
         random.nextBytes(key);
@@ -32,37 +36,50 @@ public class CredentialsService {
         newCredentials.setUsername(credentialsForm.getUsername());
         newCredentials.setPassword(encryptedPassword);
         newCredentials.setKey(encodedKey);
-        newCredentials.setDecryptedPassword(encryptionService.decryptValue(encryptedPassword, encodedKey));
 
-        credentialsMapper.addCredentials(newCredentials);
+        int id = credentialsMapper.addCredentials(newCredentials);
+        if (id == 0) {
+            logger.error("Could not save credentials to database.");
+            return false;
+        }
+        return true;
     }
 
-    public void updateCredentials(CredentialsForm credentialsForm) {
-        SecureRandom random = new SecureRandom();
-        byte[] key = new byte[16];
-        random.nextBytes(key);
-        String encodedKey = Base64.getEncoder().encodeToString(key);
-        String encryptedPassword = encryptionService.encryptValue(credentialsForm.getPassword(), encodedKey);
-
-
-        Credentials credentials = credentialsMapper.getCredentialById(credentialsForm.getCredentialId());
+    public boolean updateCredentials(CredentialsForm credentialsForm, Integer userId) {
+        Credentials credentials = credentialsMapper.getUserCredentialsById(credentialsForm.getCredentialId(), userId);
         if (credentials == null) {
-            return;
+            logger.error("Could not find credentials id {} for userid  {}.", credentialsForm.getCredentialId(), userId);
+            return false;
         }
+
+        String encryptedPassword = encryptionService.encryptValue(credentialsForm.getPassword(), credentials.getKey());
         credentials.setUrl(credentialsForm.getUrl());
         credentials.setPassword(encryptedPassword);
-        credentials.setKey(encodedKey);
         credentials.setUsername(credentialsForm.getUsername());
-        credentials.setDecryptedPassword(encryptionService.decryptValue(encryptedPassword, encodedKey));
 
-        credentialsMapper.updateCredentials(credentials);
+        int updatedRecords = credentialsMapper.updateCredentials(credentials);
+        if (updatedRecords != 1) {
+            logger.error("Could not update credentials id {} for userid {}: ", credentials.getCredentialId(), userId);
+            return false;
+        }
+        return true;
     }
 
-    public void deleteCredentials(Integer credentialId) {
-        credentialsMapper.delete(credentialId);
+    public boolean deleteCredentials(Integer credentialsId, Integer userId) {
+        int deletedRecords = credentialsMapper.delete(credentialsId, userId);
+        if (deletedRecords != 1) {
+            logger.error("Could not update credentials id {} for userid {}: ", credentialsId, userId);
+            return false;
+        }
+        return true;
     }
 
-    public List<Credentials> getCredentials(Integer userId) {
-        return credentialsMapper.getUserCredentials(userId);
+    public List<Credentials> getDecryptedCredentials(Integer userId) {
+        List<Credentials> credentialsList = credentialsMapper.getUserCredentials(userId);
+        for (Credentials credentials: credentialsList) {
+            String decryptedPassword = encryptionService.decryptValue(credentials.getPassword(),credentials.getKey());
+            credentials.setDecryptedPassword(decryptedPassword);
+        }
+        return credentialsList;
     }
 }

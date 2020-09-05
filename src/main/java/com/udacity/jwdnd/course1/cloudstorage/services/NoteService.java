@@ -1,6 +1,7 @@
 package com.udacity.jwdnd.course1.cloudstorage.services;
 
 import com.udacity.jwdnd.course1.cloudstorage.mapper.NoteMapper;
+import com.udacity.jwdnd.course1.cloudstorage.model.Credentials;
 import com.udacity.jwdnd.course1.cloudstorage.model.Note;
 import com.udacity.jwdnd.course1.cloudstorage.model.NoteForm;
 import org.slf4j.Logger;
@@ -18,27 +19,45 @@ public class NoteService {
         this.noteMapper = noteMapper;
     }
 
-    public void addNote(NoteForm noteForm, Integer userId) {
+    public boolean addNote(NoteForm noteForm, Integer userId) {
         Note newNote = new Note();
         newNote.setUserId(userId);
         newNote.setNoteTitle(noteForm.getNoteTitle());
         newNote.setNoteDescription(noteForm.getNoteDescription());
-        noteMapper.addNote(newNote);
+
+        int id = noteMapper.addNote(newNote);
+        if (id == 0) {
+            logger.error("Could not save note to database.");
+            return false;
+        }
+        return true;
     }
 
-    public void updateNote(NoteForm noteForm) {
+    public boolean updateNote(NoteForm noteForm, Integer userId) {
         Note note = noteMapper.getNoteById(noteForm.getNoteId());
         if (note == null) {
-            logger.error("not found");
-            return;
+            logger.error("Could not find note id {} for userid  {}.", noteForm.getNoteId(), userId);
+            return false;
         }
+
         note.setNoteTitle(noteForm.getNoteTitle());
         note.setNoteDescription(noteForm.getNoteDescription());
-        noteMapper.updateNote(note);
+
+        int updatedRecords = noteMapper.updateNote(note);
+        if (updatedRecords != 1) {
+            logger.error("Could not update credentials id {} for userid {}: ", note.getNoteId(), userId);
+            return false;
+        }
+        return true;
     }
 
-    public void deleteNote(Integer noteId) {
-        noteMapper.delete(noteId);
+    public boolean deleteNote(Integer noteId, Integer userId) {
+        int deletedRecords = noteMapper.delete(noteId, userId);
+        if (deletedRecords != 1) {
+            logger.error("Could not update note id {} for userid {}: ", noteId, userId);
+            return false;
+        }
+        return true;
     }
 
     public List<Note> getNotes(Integer userId) {

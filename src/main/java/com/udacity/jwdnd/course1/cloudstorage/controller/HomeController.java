@@ -11,10 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/home")
 public class HomeController {
     private UserService userService;
     private NoteService noteService;
@@ -27,10 +25,12 @@ public class HomeController {
         this.fileService = fileService;
         this.credentialsService = credentialsService;
     }
-    @GetMapping
+
+    @GetMapping("/home")
     public String HomeView(Authentication authentication, NoteForm noteForm, CredentialsForm credentialsForm, Model model) {
         String username = authentication.getName();
         User user = userService.getUser(username);
+
         if(user == null) {
             model.addAttribute("isSuccess", false);
             model.addAttribute("error", "Note is not found.");
@@ -39,7 +39,7 @@ public class HomeController {
         }
         model.addAttribute("notes", noteService.getNotes(user.getUserId()));
         model.addAttribute("files", fileService.getFiles(user.getUserId()));
-        model.addAttribute("credentials", credentialsService.getCredentials(user.getUserId()));
+        model.addAttribute("credentials", credentialsService.getDecryptedCredentials(user.getUserId()));
 
         return "home";
     }

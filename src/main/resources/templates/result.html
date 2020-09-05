@@ -16,11 +16,7 @@
             </div>
             <div class="alert alert-danger fill-parent" th:unless="${isSuccess}">
                 <h1 class="display-5">Error</h1>
-                <span>Your changes were not saved. Click <a>here</a> to continue.</span>
-            </div>
-            <div class="alert alert-danger fill-parent" th:unless="${isSuccess}">
-                <h1 class="display-5">Error</h1>
-                <span th:text="${error}">Example Error Message</span>
+                <span>Your changes were not saved.</span>
                 <span>Click <a th:href="@{/home}">here</a> to continue.</span>
             </div>
         </div>
