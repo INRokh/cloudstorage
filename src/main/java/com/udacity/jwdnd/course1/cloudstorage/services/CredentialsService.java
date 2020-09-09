@@ -23,6 +23,14 @@ public class CredentialsService {
         this.encryptionService = encryptionService;
     }
 
+    /**
+     * Store credentials in the database securely
+     *
+     * @param  credentialsForm  credentials data
+     * @param  userId id of the owner of the credentials
+     * @return <code>true</code> if successfully added credentials;
+     *         <code>false</code> if error occurred
+     */
     public boolean addCredentials(CredentialsForm credentialsForm, Integer userId) {
         SecureRandom random = new SecureRandom();
         byte[] key = new byte[16];
@@ -45,6 +53,14 @@ public class CredentialsService {
         return true;
     }
 
+    /**
+     * Update existing credentials in the database.
+     *
+     * @param  credentialsForm  credentials data
+     * @param  userId id of the owner of the credentials
+     * @return <code>true</code> if successfully updated credentials;
+     *         <code>false</code> if credentials are not updated
+     */
     public boolean updateCredentials(CredentialsForm credentialsForm, Integer userId) {
         Credentials credentials = credentialsMapper.getUserCredentialsById(credentialsForm.getCredentialId(), userId);
         if (credentials == null) {
@@ -65,15 +81,29 @@ public class CredentialsService {
         return true;
     }
 
+    /**
+     * Delete existing credentials in the database.
+     *
+     * @param  credentialsId
+     * @param  userId id of the owner of the credentials
+     * @return <code>true</code> if successfully deleted credentials;
+     *         <code>false</code> if credentials are not deleted
+     */
     public boolean deleteCredentials(Integer credentialsId, Integer userId) {
         int deletedRecords = credentialsMapper.delete(credentialsId, userId);
         if (deletedRecords != 1) {
-            logger.error("Could not update credentials id {} for userid {}: ", credentialsId, userId);
+            logger.error("Could not delete credentials id {} for userid {}: ", credentialsId, userId);
             return false;
         }
         return true;
     }
 
+    /**
+     * Loads and decrypt credentials
+     *
+     * @param  userId id of the owner of the credentials
+     * @return credentialsList of decrypted credentials
+     */
     public List<Credentials> getDecryptedCredentials(Integer userId) {
         List<Credentials> credentialsList = credentialsMapper.getUserCredentials(userId);
         for (Credentials credentials: credentialsList) {

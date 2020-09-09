@@ -1,5 +1,10 @@
 package com.udacity.jwdnd.course1.cloudstorage.model;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter @Setter @NoArgsConstructor
 public class Credentials {
     private Integer credentialId;
     private String url;
@@ -9,59 +14,13 @@ public class Credentials {
     private Integer userId;
     private String decryptedPassword;
 
-    public Integer getCredentialId() {
-        return credentialId;
-    }
-
-    public void setCredentialId(Integer credentialId) {
+    public Credentials(int credentialId, String url, String username, String key, String password, Integer userId, String decryptedPassword) {
         this.credentialId = credentialId;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
         this.url = url;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
         this.key = key;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
         this.userId = userId;
-    }
-
-    public String getDecryptedPassword() {
-        return decryptedPassword;
-    }
-
-    public void setDecryptedPassword(String decryptedPassword) {
         this.decryptedPassword = decryptedPassword;
     }
 }

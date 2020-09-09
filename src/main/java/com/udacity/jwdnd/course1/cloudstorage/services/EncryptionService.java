@@ -2,7 +2,6 @@ package com.udacity.jwdnd.course1.cloudstorage.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.*;
@@ -16,6 +15,13 @@ import java.util.Base64;
 public class EncryptionService {
     private Logger logger = LoggerFactory.getLogger(EncryptionService.class);
 
+    /**
+     * Symmetrically encrypt a value using provided key.
+     *
+     * @param  data  data to be encrypted
+     * @param  key encryption key
+     * @return encrypted value
+     */
     public String encryptValue(String data, String key) {
         byte[] encryptedValue = null;
 
@@ -32,6 +38,13 @@ public class EncryptionService {
         return Base64.getEncoder().encodeToString(encryptedValue);
     }
 
+    /**
+     * Decrypt a value using key
+     *
+     * @param  data  data to be decrypted
+     * @param  key encryption key
+     * @return decrypted value
+     */
     public String decryptValue(String data, String key) {
         byte[] decryptedValue = null;
 

@@ -19,6 +19,14 @@ public class NoteService {
         this.noteMapper = noteMapper;
     }
 
+    /**
+     * Store a note in the database
+     *
+     * @param  noteForm  note data
+     * @param  userId id of the owner of the note
+     * @return <code>true</code> if successfully added note;
+     *         <code>false</code> if error occurred
+     */
     public boolean addNote(NoteForm noteForm, Integer userId) {
         Note newNote = new Note();
         newNote.setUserId(userId);
@@ -33,6 +41,14 @@ public class NoteService {
         return true;
     }
 
+    /**
+     * Update existing note in the database.
+     *
+     * @param  noteForm  note data
+     * @param  userId id of the owner of the note
+     * @return <code>true</code> if successfully updated note;
+     *         <code>false</code> if note are not updated
+     */
     public boolean updateNote(NoteForm noteForm, Integer userId) {
         Note note = noteMapper.getNoteById(noteForm.getNoteId());
         if (note == null) {
@@ -45,21 +61,35 @@ public class NoteService {
 
         int updatedRecords = noteMapper.updateNote(note);
         if (updatedRecords != 1) {
-            logger.error("Could not update credentials id {} for userid {}: ", note.getNoteId(), userId);
+            logger.error("Could not update note id {} for userid {}: ", note.getNoteId(), userId);
             return false;
         }
         return true;
     }
 
+    /**
+     * Delete existing note in the database.
+     *
+     * @param  noteId
+     * @param  userId id of the owner of the note
+     * @return <code>true</code> if successfully deleted note;
+     *         <code>false</code> if credentials are not note
+     */
     public boolean deleteNote(Integer noteId, Integer userId) {
         int deletedRecords = noteMapper.delete(noteId, userId);
         if (deletedRecords != 1) {
-            logger.error("Could not update note id {} for userid {}: ", noteId, userId);
+            logger.error("Could not delete note id {} for userid {}: ", noteId, userId);
             return false;
         }
         return true;
     }
 
+    /**
+     * Loads notes
+     *
+     * @param  userId id of the owner of the notes
+     * @return list of notes
+     */
     public List<Note> getNotes(Integer userId) {
         return noteMapper.getUserNotes(userId);
     }

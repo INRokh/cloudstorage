@@ -19,6 +19,14 @@ public class FileService {
         this.fileMapper = fileMapper;
     }
 
+    /**
+     * Store a file in the database.
+     *
+     * @param  file  file data
+     * @param  userId id of the owner of the file
+     * @return <code>true</code> if successfully added file;
+     *         <code>false</code> if error occurred
+     */
     public boolean addFile(MultipartFile file, Integer userId) {
         File newFile = new File();
         newFile.setUserId(userId);
@@ -39,6 +47,13 @@ public class FileService {
         return true;
     }
 
+    /**
+     * Loads file by filename and userid.
+     *
+     * @param  fileName
+     * @param  userId id of the owner of the file
+     * @return file
+     */
     public File getFileByNameAndUserId(String fileName, Integer userId) {
         File file = fileMapper.getFileByNameAndUserId(fileName, userId);
         if(file == null) {
@@ -47,10 +62,25 @@ public class FileService {
         return file;
     }
 
+    /**
+     * Loads file by fileid and userid.
+     *
+     * @param  fileId
+     * @param  userId id of the owner of the file
+     * @return file
+     */
     public File getFileByIdAndUserId(Integer fileId, Integer userId) {
         return fileMapper.getFileByIdAndUserId(fileId, userId);
     }
 
+    /**
+     * Delete existing file in the database.
+     *
+     * @param  fileId
+     * @param  userId id of the owner of the credentials
+     * @return <code>true</code> if successfully deleted file;
+     *         <code>false</code> if file are not deleted
+     */
     public boolean deleteFile(Integer fileId, Integer userId) {
         int deletedRecords = fileMapper.delete(fileId, userId);
         if (deletedRecords != 1) {
@@ -60,6 +90,12 @@ public class FileService {
         return true;
     }
 
+    /**
+     * Loads files
+     *
+     * @param  userId id of the owner of the files
+     * @return list of files
+     */
     public List<File> getFiles(Integer userId) {
         return fileMapper.getUserFiles(userId);
     }

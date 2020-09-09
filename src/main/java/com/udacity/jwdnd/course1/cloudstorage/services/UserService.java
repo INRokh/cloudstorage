@@ -17,10 +17,22 @@ public class UserService {
         this.hashService = hashService;
     }
 
+    /**
+     * Check if username is available.
+     *
+     * @param  username
+     * @return <code>true</code> if username is available; <code>false</code> if username is already exists
+     */
     public boolean isUsernameAvailable(String username) {
         return userMapper.getUser(username) == null;
     }
 
+    /**
+     * Create user in the database.
+     *
+     * @param  user user data
+     * @return id of created user
+     */
     public int createUser(User user) {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
@@ -30,6 +42,12 @@ public class UserService {
         return userMapper.insert(new User(null, user.getUsername(), encodedSalt, hashedPassword, user.getFirstName(), user.getLastName()));
     }
 
+    /**
+     * Load user data.
+     *
+     * @param  username user data
+     * @return user data
+     */
     public User getUser(String username) {
         return userMapper.getUser(username);
     }
